@@ -29,6 +29,7 @@ mysqlUtilities.introspection(connection);
 //Переменные
 var users = new Array();
 var battles = new Array();
+var mobs = new Array();
 
 
 //Удар
@@ -506,8 +507,7 @@ io.on('connection', function (socket) {
     //---------------------------
     socket.on('get_battle',function(data,callback){
         if(users[name].character && users[name].main_status.battle == 1){
-            logger.warn(battles[users[name].battle.id].round);
-            //callback(battles[users[name].battle.id]);
+            callback(battles[users[name].battle.id]);
         }
     });
     //------------------------Действия---------------------------------\\
@@ -537,7 +537,14 @@ io.on('connection', function (socket) {
                 '[' + battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number].level + ']',hit:hit_to});
 
             if(hit_to.hit == 1){
-                battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] -= hit_to.dmg;
+                var time = new Date();
+                battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] = battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] +
+                    battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_reg'] *
+                    (time.getTime() - battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_reg_time'])/1000 - hit_to.dmg;
+                battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_reg_time'] = time.getTime();
+                if(battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] > battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_max']){
+                    battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] = battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_max'];
+                }
                 hit_to.hp_target = battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'];
 
                 if(hit_to.hp_target <= 0){
@@ -545,20 +552,28 @@ io.on('connection', function (socket) {
                     battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] = 0;
 
                     //Останавливаем моба
-                    clearInterval(battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number].mob_att);
+                    clearInterval(mobs[battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number].mob_att]);
                     //Награда
-                    //io.to(socket.id).emit('chat_drop',{type: 'gold', amount:getGold(users[name].battle.round[users[name].battle.target])});
+                    io.to(socket.id).emit('chat_drop',{type: 'gold', amount:getGold(battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number])});
                     ////Опыт
-                    //io.to(socket.id).emit('chat_drop',{type: 'exp', amount:updateExp(getExpFromMob(users[name].battle.round[users[name].battle.target]))});
+                    io.to(socket.id).emit('chat_drop',{type: 'exp', amount:updateExp(getExpFromMob(battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]))});
                     ////Дроп
-                    //Drop(users[name].battle.round[users[name].battle.target],1,name);
-                    //Проверяем, есть ли еще мобы в данном раунде
-                    if(users[name].battle.targets == 0){
+                    Drop(battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number],1,name);
+
+                    //Проверяем, есть ли еще живые мобы в данном раунде
+                    var check = true;
+                    for(var i = 0; i < battles[users[name].battle.id].round[users[name].main_status.target.group].lenght;i++){
+                        if(battles[users[name].battle.id].round[users[name].main_status.target.group][i]['health'] > 0){
+                            check = false;
+                        }
+                    }
+                    if(check){
                         //Здесь должна быть функция завершения раунда
                         if(users[name].battle.rounds == users[name].battle.round_n){
+                            hit_to.f_b = 1;
+                            finishBattle(users[name].battle.id);
                             users[name].battle = {type:'none',last:users[name].battle.last};
                             users[name].main_status.battle = 0;
-                            hit_to.f_b = 1;
                         }
                         else{
                             users[name].battle.status = 0;
@@ -738,13 +753,17 @@ io.on('connection', function (socket) {
     });
     socket.on('leave_battle',function(type,callback){
         users[name].main_status.battle = 0;
-        if(battles[users[name].battle.id].round && battles[users[name].battle.id].type == 'mob'){
-            var loc = battles[users[name].battle.id].round[1][0].loc;
+        var loc = "";
+        if(users[name].battle.id != undefined){
+            if(battles[users[name].battle.id].round && battles[users[name].battle.id].type == 'mob'){
+                loc = battles[users[name].battle.id].round[1][0].loc;
+            }
+            else{
+                loc = '/';
+            }
+            finishBattle(users[name].battle.id);
+            users[name].battle = {type:'none',last:users[name].battle.last};
         }
-        else{
-            var loc = '/';
-        }
-        finishBattle(users[name].battle.id);
         callback(loc);
     });//??????????????????????Куча нюансов
 
@@ -1043,13 +1062,14 @@ io.on('connection', function (socket) {
     };
     function lifeMob(battle_id,number){
         battles[battle_id].round[1][number].mob_att = null;
-        battles[battle_id].round[1][number].mob_att = setInterval(function(){
+        battles[battle_id].round[1][number].mob_att = randWDclassic(20);
+        mobs[battles[battle_id].round[1][number].mob_att] = setInterval(function(){
             if(users[battles[battle_id].round[1][number].target] == undefined){//Если пользователь отсоеденился
-                clearInterval(battles[battle_id].round[1][number].mob_att);
+                clearInterval(mobs[battles[battle_id].round[1][number].mob_att]);
             }
             else{
                 if(users[battles[battle_id].round[1][number].target].character.health <= 0 || battles[battle_id].round[1][number]['health'] <= 0 || users[battles[battle_id].round[1][number].target].main_status.battle == 0){
-                    clearInterval(battles[battle_id].round[1][number].mob_att);
+                    clearInterval(mobs[battles[battle_id].round[1][number].mob_att]);
                 }
                 else{
                     var mob_hit = hit(users[battles[battle_id].round[1][number].target].character,battles[battle_id].round[1][number],0);
@@ -1067,30 +1087,16 @@ io.on('connection', function (socket) {
             }
         },battles[battle_id].round[1][number].aspeed * 1000);
 
-
-        battles[battle_id].round[1][number].mob_reg = null;
-        //battles[battle_id].round[1][number].mob_reg = setTimeout(function(){
-            //if(battles[battle_id].round[1][number]['health'] == 0  || users[battles[battle_id].round[1][number].target].main_status.battle == 0){
-            //    clearInterval(battles[battle_id].round[1][number].mob_att);
-            //    clearInterval(battles[battle_id].round[1][number].mob_reg);
-            //}
-            //else{
-            //    if(battles[battle_id].round[1][number]['health'] < battles[battle_id].round[1][number]['health_max']){
-            //        battles[battle_id].round[1][number]['health'] += battles[battle_id].round[1][number]['health_reg'];
-            //        if(battles[battle_id].round[1][number]['health'] > battles[battle_id].round[1][number]['health_max']){
-            //            battles[battle_id].round[1][number]['health'] = battles[battle_id].round[1][number]['health_max'];
-            //        }
-            //    }
-            //}
-        //},10000);
+        var timee = new Date();
+        battles[battle_id].round[1][number].health_reg_time = timee.getTime();
     };
     //Завершение боя
     function finishBattle(battle_id){
         if(battles[battle_id].type == 'mob'){
             for(var i = 0; i < battles[battle_id].round[1].length; i++){
                 if(battles[battle_id].round[1][i].health > 0){
-                    clearInterval(battles[battle_id].round[1][i].mob_att);
-                    clearInterval(battles[battle_id].round[1][i].mob_reg);
+                    clearInterval(mobs[battles[battle_id].round[1][i].mob_att]) ;
+                    delete mobs[battles[battle_id].round[1][i].mob_att];
                 }
             }
         }

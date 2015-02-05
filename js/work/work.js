@@ -4,8 +4,8 @@
 
 
 //Подключение
-//var main_socket = io.connect('http://79.133.123.126:852', {
-var main_socket = io.connect('http://localhost:852', {
+var main_socket = io.connect('http://81.177.142.213:852', {
+//var main_socket = io.connect('http://localhost:852', {
 //var main_socket = io.connect('192.168.0.103:852', {
     'reconnect': false,
     'reconnectionDelay': 1000,
@@ -184,20 +184,20 @@ $(document).ready(function(){
             }
         };
         console.log(main_status);
-        if(main_status.target != undefined){
-            var check_battle = setInterval(function(){
-                if (battle_round != undefined){
-                    if(battle_round.status){
-                        $("#prefer_battle_actions").hide();
-                        $("#battle_actions").show();
-                    }
-                    clearInterval(check_battle);
-                    $("#wait_connect_battle").hide();
-                    $("#battle_").show();
-                    change_target(battle_round);
-                }
-            },100);
-        }
+        //if(main_status.target != undefined){
+        //    var check_battle = setInterval(function(){
+        //        if (battle_round != undefined){
+        //            if(battle_round.status){
+        //                $("#prefer_battle_actions").hide();
+        //                $("#battle_actions").show();
+        //            }
+        //            clearInterval(check_battle);
+        //            $("#wait_connect_battle").hide();
+        //            $("#battle_").show();
+        //            change_target(battle_round);
+        //        }
+        //    },100);
+        //}
 
 
     });

@@ -68,10 +68,13 @@ function battle(main_socket){
         $('#battle_').hide();
         $('#wait_connect_battle').show();
         $('#timer_text').html('Поиск врага ...');
-        main_socket.emit('leave_battle', 0,function(loc){
+        main_socket.emit('leave_battle', 0,function(){
              var count = (Math.random()*(3500 - 2000 + 1))+2000;
             setTimeout(function(){
-                main_socket.emit('great_battle_with_mob', 'last',function(){});
+                main_socket.emit('great_battle_with_mob', 'last',function(){
+                    $('#home').html('Покинуть бой');
+                    $('#prefer_battle_actions').show();
+                });
             },count);
         });
     });
