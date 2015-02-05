@@ -1,0 +1,233 @@
+@media (max-width: 540px) {
+    #Gen{
+        margin-left: 0;
+    }
+}
+
+
+@media (min-width: 541px) {
+    #Gen{
+        margin-left: 30%;
+    }
+}
+
+.btn-footer {
+    width: 100%;
+    display: inline-block;
+    padding: 6px 2px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.428571429;
+    text-align: center;
+    color: #FFDF8C;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    background-color: transparent;
+    border: 1px solid #FFDF8C;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.btn-footer:focus,
+.btn-footer:hover,
+.btn-footer:active,
+.btn-footer.active  {
+    color: #333333;
+    background-color: #FFDF8C;
+}
+
+.btn-footer.disabled,
+.btn-footer[disabled]{
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+/*Основные кнопки*/
+.btn-main {
+    width: 100%;
+    display: inline-block;
+    padding: 6px 2px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.428571429;
+    text-align: center;
+    color: #FFDF8C;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    background-color: transparent;
+    border: 1px solid #FFDF8C;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.btn-main:focus,
+.btn-main:hover,
+.btn-main:active,
+.btn-main.active  {
+    background-color: #A0A0A0;
+}
+
+.btn-main.disabled,
+.btn-main[disabled]{
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+
+
+
+.btn-main_2 {
+    width: 100%;
+    display: inline-block;
+    padding: 6px 2px;
+    margin-bottom: 1px;
+    font-size: 14px;
+    font-size: smaller;
+    font-weight: bold;
+    color: #ffffff;
+    line-height: 1.428571429;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    background-color: transparent;
+    border: 1px solid #eeeeee;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.btn-main_2:focus,
+.btn-main_2:hover,
+.btn-main_2:active,
+.btn-main_2.active  {
+    font-size: small;
+    color: #333333;
+    background-color: #A0A0A0;
+}
+.btn-main_2:focus .lol,
+.btn-main_2:hover .lol,
+.btn-main_2:active .lol,
+.btn-main_2.active .lol{
+    color:  #FFDF8C;;
+}
+
+.btn-main_2.disabled,
+.btn-main_2[disabled]{
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+
+.btn-thing {
+    width: 100%;
+    display: inline-block;
+    padding: 6px 2px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.428571429;
+    text-align: center;
+    color: #FFDF8C;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    background-color: transparent;
+    border: 1px solid #FFDF8C;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.btn-thing:focus,
+.btn-thing:hover,
+.btn-thing:active,
+.btn-thing.active  {
+    background-color: #A0A0A0;
+}
+
+.btn-thing.disabled,
+.btn-thing[disabled]{
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+/*Действия в бою*/
+.btn-action {
+    width: 85px;
+    height: 55px;
+    display: inline-block;
+    padding: 1px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 55px;
+
+    text-align: center;
+    color: #FFDF8C;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    background-color: transparent;
+    border: 1px solid #FFDF8C;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.btn-action:focus,
+.btn-action:hover,
+.btn-action:active,
+.btn-action.active  {
+    background-color: #A0A0A0;
+}
+
+.btn-action.disabled,
+.btn-action[disabled]{
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}

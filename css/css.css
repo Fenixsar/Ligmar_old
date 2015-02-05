@@ -1,0 +1,363 @@
+html, body {
+    max-width: 720px;
+    height: 100%;
+    margin: 0 auto;
+    font-family: verdana, tahoma, arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.428571429;
+    background-color: #A0A0A0;
+    color: #FFDF8C;
+}
+
+#main {
+    padding: 2px;
+    background-color: #333333;
+    height: 100%;
+}
+
+#footer {
+    padding-bottom: 2px;
+    background-color: #333333;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    margin-top: -56px;
+    max-width: 720px;
+}
+
+#chat_main {
+    padding-bottom: 56px;
+}
+
+h1.main {
+    margin-top: 0;
+    text-align: center;
+}
+
+h2.enter {
+    text-align: center;
+}
+
+h3 {
+    margin: 2px 5px;
+}
+
+h3.mob {
+    color: #ffffff;
+    font-size: 14px;
+    text-align: center;
+}
+h3.target {
+    color: #ffffff;
+    font-size: 14px;
+    text-align: center;
+}
+
+h3#header_name_hero {
+    margin: 0;
+    font-size: 28px;
+    text-align: center;
+    font-family: "Lucida Grande", "Helvetica Nueue", Arial, sans-serif;
+}
+
+h3#header_name_hero:first-letter{
+    text-transform: uppercase;
+}
+
+h4#header_class{
+    text-align: center;
+    color: #ffffff;
+    margin: 0;
+    margin-top: -20px;
+}
+
+h5 {
+    font-size: 15px;
+    margin: 5px 3px;
+}
+
+p {
+    font-size: 14px;
+    margin: 0 3px;
+    color: #ffffff;
+}
+
+div.menu {
+    background-color: #575757;
+
+}
+
+div.exp1 {
+    background: #666666;
+    height: 1px;
+    padding: 0;
+    margin-top: 6px;
+}
+
+div.add_char {
+    color: green;
+    text-align: center;
+}
+
+div.mob_hp {
+    background: #666666;
+    height: 9px;
+    padding: 0;
+    width: 50%;
+    margin: 0 auto;
+}
+div.mob_hp2 {
+    background: #ff0000;
+    height: 9px;
+    padding: 0;
+}
+div.text {
+    color: #ffffff;
+    padding: 5px;
+}
+div.square {
+    overflow: auto;
+    height: 200px;
+    border: solid 1px black;
+}
+
+p.enter {
+    text-align: center;
+    font-size: 16px;
+    color: red;
+}
+p.thing{
+    margin: -6px 45px;
+    font-weight: normal;
+}
+p.line{
+    line-height: 1.1;
+}
+p.line2{
+    line-height: 1.1;
+    color: cornflowerblue;
+}
+a.not {
+    color: #FFDF8C;
+    text-decoration: none;
+}
+
+a.b1 {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+a.btn1 {
+    padding: 5px 5px;
+    border-bottom: #666666 dotted 1px;
+    text-decoration: none;
+}
+.btn1:hover,
+.btn1:focus {
+    color: #FFDF8C;
+    background-color: #666666;
+}
+.btn2:hover,
+.btn2:focus {
+    background-color: transparent;
+}
+
+
+hr.zero {
+    margin: 0;
+}
+
+hr.main {
+    margin: 0;
+    border-width: 10px 0 0;
+    border-color: #575757;
+}
+
+ul.char {
+    padding-left: 10px;
+    margin: 0;
+}
+
+li.char {
+    line-height: 20px;
+    width: 100%;
+    list-style: none;
+}
+
+span.char {
+    margin-right: 15px;
+    float: right;
+    color: #ffffeff;
+    font-weight: bold;
+}
+/*Чат*/
+.char_link_for_chat {
+    cursor: pointer;
+}
+
+#chat_add_window {
+    position: fixed;
+    display: none;
+    right: 0;
+    top: auto;
+    height: 130px;
+    width: 100px;
+    background: #fffed2;
+    border: 1px solid #000000;
+    z-index: 100;
+    padding: 5px;
+}
+
+.chat_party {
+    color: lime;
+}
+
+.chat_guild {
+    color: cyan;
+}
+
+.chat_market {
+    color: orange;
+}
+
+.chat_log {
+    color: #808080;
+}
+
+.chat_gold {
+    color: goldenrod;
+}
+
+.chat_exp {
+    color: #f7ecb5;
+}
+
+.chat_drop {
+    color: greenyellow;
+}
+
+.chat_item {
+    color: yellow;
+    font-weight: bold;
+    font-style: oblique;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.chat_solo {
+    color: royalblue;
+}
+
+.chat_chanel:active,
+.chat_chanel.active{
+    background-color: #A0A0A0;
+}
+
+.chat_list_char:active,
+.chat_list_char.active{
+    background-color: #A0A0A0;
+}
+
+/*Пати*/
+#party {
+    border: 1px dotted #FFDF8C;
+    background-color: #000000;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.party_char{
+    border: 1px dotted #FFDF8C;
+    overflow: hidden;
+}
+
+.party_5 {
+    width: 20%;
+    float: left;
+}
+
+.party_char_name{
+    margin-top: 5px;
+    margin-left: 20px;
+    margin-bottom: 5px;
+}
+
+.party_progress{
+    height: 5px;
+    margin: 0 10px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/*Уведомления*/
+#notification_window{
+    width:100%;
+    min-height:100%;
+    background-color: rgba(0,0,0,0.5);
+    position:fixed;
+    top:0;
+    left: 0;
+    z-index: 100;
+}
+.notification_window_2{
+    text-align: center;
+    margin: auto;
+    padding:10px;
+    background-color: #c5c5c5;
+    border-radius:5px;
+    box-shadow: 0px 0px 10px #000;
+    width: 300px;
+}
+.notification_window_1{
+    text-align: center;
+    margin: auto;
+    padding:10px;
+    background-color: #c5c5c5;
+    border-radius:5px;
+    box-shadow: 0px 0px 10px #000;
+    width: 300px;
+}
+
+#notification_green_close{
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+    font-size: small;
+}
+
+.without_chat{
+    margin-bottom: 56px;
+}
+
+/*Действия*/
+.cooldown{
+    position: static;
+    width: 100%;
+    background-color: gold;
+}
+
+#action_hit_target{
+    background-image: url(../img/actions/hit.jpg);
+}
+#action_change_target{
+    background-image: url(../img/actions/change.jpg);
+}
+#action_health_bottle{
+    background-image: url(../img/actions/hp.jpg);
+}
+#action_mana_bottle{
+    background-image: url(../img/actions/mp.jpg);
+}
+.action_skill[id_skill='1']{
+    background-image: url(../img/skills/warrior.png);
+}
+.btn-action.action_skill[id_skill='1']:active{
+    background-image: url(../img/skills/warrior.png);
+    background-position: 84px;
+}
