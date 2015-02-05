@@ -352,6 +352,7 @@ function battle(main_socket){
     //Инфа о созданном раунде
     main_socket.on('round_ready',function(battle){
         battle_round = battle;
+        change_target(battle_round);
     });
 
     //Ошибки

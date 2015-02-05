@@ -127,7 +127,7 @@ $(document).ready(function(){
         cd = new Array();
         main_status = data;
         //Запускаем кулдауны
-        if(main_status.bottles.hp_c){
+        if(main_status.bottles.hp_c > 0){
             var h = main_status.bottles.hp_c/60*55;
             $('#action_health_bottle').addClass('disabled').next().css('height',h).css('margin-top',-h);
             var hp_c = cd.length;
@@ -144,7 +144,7 @@ $(document).ready(function(){
         else{
             $('#action_health_bottle').removeClass('disabled');
         }
-        if(main_status.bottles.mp_c){
+        if(main_status.bottles.mp_c > 0){
             var mp = main_status.bottles.mp_c/60*55;
             $('#action_mana_bottle').addClass('disabled').next().css('height',mp).css('margin-top',-mp);
             var mp_c = cd.length;
@@ -184,25 +184,23 @@ $(document).ready(function(){
             }
         };
         console.log(main_status);
-        //if(main_status.target != undefined){
-        //    var check_battle = setInterval(function(){
-        //        if (battle_round != undefined){
-        //            if(battle_round.status){
-        //                $("#prefer_battle_actions").hide();
-        //                $("#battle_actions").show();
-        //            }
-        //            clearInterval(check_battle);
-        //            $("#wait_connect_battle").hide();
-        //            $("#battle_").show();
-        //            change_target(battle_round);
-        //        }
-        //    },100);
-        //}
+        if(main_status.target != undefined){
+            var check_battle = setInterval(function(){
+                if (battle_round != undefined){
+                    if(battle_round.status){
+                        $("#prefer_battle_actions").hide();
+                        $("#battle_actions").show();
+                    }
+                    clearInterval(check_battle);
+                    $("#wait_connect_battle").hide();
+                    $("#battle_").show();
+                }
+            },100);
+        }
 
 
     });
     main_socket.on('hp_mp',function(data){
-        console.log(data);
         hp_mp(data);
     });
 

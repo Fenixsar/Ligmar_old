@@ -36,7 +36,7 @@ if($user_id != 0){
                 </div>
                 <div id="character_death" class="row"></div>
                 <div id="prefer_battle_actions" class="row">
-                    <div class="col-xs-6"><button id="start_battle" class="btn-main">Атаковать!</button></div>
+                    <div class="col-xs-6"><button id="start_battle" class="btn-main">Напасть!</button></div>
                     <div class="col-xs-6"><button class="btn-main next_mob">Искать еще!</button></div>
                 </div>
                 <div id="battle_actions" class="row" style="display: none;">
