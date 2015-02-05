@@ -12,8 +12,8 @@ var logger = log4js.getLogger();
 logger.setLevel('info');
 
 //Подключение MySQL
-var mysql = require('/var/www/html/node_modules/mysql-utilities/node_modules/mysql');
-mysqlUtilities = require('/var/www/html/node_modules/mysql-utilities');
+var mysql = require('/var/www/node_modules/mysql-utilities/node_modules/mysql');
+mysqlUtilities = require('/var/www/node_modules/mysql-utilities');
 
 //Настройки конфигурации mysql
 var connection = mysql.createConnection({
