@@ -40,7 +40,7 @@ var wait = '<div id="wait_loading_game"><div id="Gen" class="row">' +
     '<div class="block" id="rotate_08"></div>' +
     '</div><div id="timer_text" class="row">Загрузка...</div></div>';
 
-function Ajax(url,param){
+function Ajax(url,param,callback){
     $('#game').css('height',$('#game').css('height'));
     $.ajax({
         beforeSend: function(){
@@ -61,9 +61,7 @@ function Ajax(url,param){
                 Ajax('../user/bag.php');
             }
             else if (data == 'eqip'){
-                main_socket.emit('updateAllStats','0',function(data){
-                    hp_mp(data);
-                });
+                main_socket.emit('updateAllStats','0');
                 Ajax('../user/eqip.php');
             }
             else{
@@ -103,15 +101,13 @@ function Ajax(url,param){
             else if (param == 'death'){
                 $('#home').removeClass('active').addClass('disabled');
                 main_socket.emit('death_info','1',function(death_info){
-                    var time = new Date();
-                    time = time.getTime();
-                    time = death_info - time;
-                    if(time < 0){
-                        time = 0;
+
+                    if(death_info < 0){
+                        death_info = 0;
                     }
-                    var time_m = time;
-                    time = new Date(time);
-                    $('#res_time_remaining').html(time.getMinutes() + ':' + time.getSeconds());
+                    var time_m = death_info;
+                    death_info = new Date(death_info);
+                    $('#res_time_remaining').html(death_info.getMinutes() + ':' + death_info.getSeconds());
                     var res_time = setInterval(function(){
                         time_m -= 1000;
                         if(time_m <= 0){
@@ -119,19 +115,20 @@ function Ajax(url,param){
                             clearInterval(res_time);
                             $('#res_to_town').removeAttr('disabled');
                         }
-                        time = new Date(time_m);
-                        $('#res_time_remaining').html(time.getMinutes() + ':' + time.getSeconds());
+                        death_info = new Date(time_m);
+                        $('#res_time_remaining').html(death_info.getMinutes() + ':' + death_info.getSeconds());
                     },1000)
                 });
             }
             else if (param != undefined){
                 if(param.to == 'eqip'){
-                    main_socket.emit('updateAllStats','0',function(data){
-                        hp_mp(data);
-                    });
+                    main_socket.emit('updateAllStats','0');
                 }
             }
             resize();
+            if (callback) {
+                callback();
+            }
         }
     });
 };

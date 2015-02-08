@@ -52,7 +52,7 @@ function hp_mp(data){
             }
         }
         else{
-            if($('#battle_').html()){
+            if(main_status.battle){
                 var number = parseFloat($('#health').attr('now')) + parseFloat($('#health').attr('reg'));
             }
             else{
@@ -68,7 +68,7 @@ function hp_mp(data){
 
     },1000);
     reg_mp = setInterval(function(){
-        if($('#battle_').html()){
+        if(main_status.battle){
             var number = parseFloat($('#mana').attr('now')) + parseFloat($('#mana').attr('reg'));
         }
         else{
@@ -101,10 +101,9 @@ $(document).ready(function(){
             if(data.name == 'hp_mp'){
                 hp_mp(data.value);
                 if(data.battle){
-                    main_socket.emit('get_battle',0,function(data){
-                        battle_round = data;
-                        Ajax('../work/battle.php');
+                    Ajax('../work/battle.php',undefined,function(){
                         $('#home').html('Покинуть бой').removeClass('active');
+                        main_socket.emit('get_battle',0,function(){});
                     });
                 }
             }
@@ -183,21 +182,6 @@ $(document).ready(function(){
                 $('#action_skills .action_skill[id_skill="' + main_status.skills[y].id + '"] ').removeClass('disabled');
             }
         };
-        console.log(main_status);
-        if(main_status.target != undefined){
-            var check_battle = setInterval(function(){
-                if (battle_round != undefined){
-                    if(battle_round.status){
-                        $("#prefer_battle_actions").hide();
-                        $("#battle_actions").show();
-                    }
-                    clearInterval(check_battle);
-                    $("#wait_connect_battle").hide();
-                    $("#battle_").show();
-                }
-            },100);
-        }
-
 
     });
     main_socket.on('hp_mp',function(data){

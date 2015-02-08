@@ -19,7 +19,7 @@ if($user_id != 0){
         <div class="block" id="rotate_08"></div>
         </div><div id="timer_text" class="row">Загрузка боя...</div></div>
 
-        <div class="row" id="battle_">
+        <div class="row" id="battle_" style="display: none">
             <div style="float: left;position: absolute;font-size: smaller"><img src="../img/skull.gif"><span id="round"></span></div>
             <div id="round_progress" style="float: right;position: absolute"></div>
                 <h3 class="target" id="0"><span id="target_name"></span>[<span id="target_lvl"></span>]<br>
@@ -67,18 +67,6 @@ if($user_id != 0){
         </div>';
 
     echo '<script type="text/javascript">
-        var check_battle = setInterval(function(){
-            if (battle_round != undefined){
-                change_target(battle_round);
-                if(battle_round.status){
-                    $("#prefer_battle_actions").hide();
-                    $("#battle_actions").show();
-                }
-                clearInterval(check_battle);
-                $("#wait_connect_battle").hide();
-                $("#battle_").show();
-            }
-        },100);
         if(main_status.bottles.hp <= 0){
             $("#action_health_bottle").addClass("disabled");
         }

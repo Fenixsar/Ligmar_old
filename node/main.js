@@ -152,21 +152,17 @@ io.on('connection', function (socket) {
                         //Подключаемся к чату локации
                         socket.emit('chat',connectToChat());
 
+                        //Устанавливаем время для регена
+                        var t = new Date();
+                        users[name].character['reg_time'] = t.getTime();
+
                         //Если отконнектился мертвым
                         if(users[data.nick].character['death'] != null){
                             users[data.nick].death = users[data.nick].character['death'];
                             callback({name: 'death',value:users[name].death});
                         }
                         else{
-                            regen_hp();
-                            regen_mp();
-
-                            callback({name: 'hp_mp',value:{hp:users[data.nick].character['health'],
-                                hp_max:users[data.nick].character['health_max'],
-                                hp_reg:users[data.nick].character['health_reg'],
-                                mp:users[data.nick].character['mana'],
-                                mp_max:users[data.nick].character['mana_max'],
-                                mp_reg:users[data.nick].character['mana_reg']}
+                            callback({name: 'hp_mp',value:hp_mp(data.nick)
                             });
                         }
 
@@ -195,12 +191,7 @@ io.on('connection', function (socket) {
                 }
                 else{
                     var cb = {name: 'hp_mp',
-                        value:{hp:users[data.nick].character['health'],
-                            hp_max:users[data.nick].character['health_max'],
-                            hp_reg:users[data.nick].character['health_reg'],
-                            mp:users[data.nick].character['mana'],
-                            mp_max:users[data.nick].character['mana_max'],
-                            mp_reg:users[data.nick].character['mana_reg']},
+                        value:hp_mp(data.nick),
                             location: users[data.nick].location};
                     if(users[data.nick].main_status.battle){
                         cb.battle = 1;
@@ -233,10 +224,7 @@ io.on('connection', function (socket) {
         pong();
     });
     //UpdateAllStats
-    socket.on('updateAllStats', function(data,callback){
-        //Убираем реген
-        clearInterval(hp_reg);
-        clearInterval(mp_reg);
+    socket.on('updateAllStats', function(data){
         connection.queryRow('SELECT * FROM characters WHERE name = ?', [name],
             function(err, row){
                 users[name].character['level'] = row['level'];
@@ -268,16 +256,8 @@ io.on('connection', function (socket) {
                     users[name].character['health'] = users[name].character['health_max'];
                 if(users[name].character['mana'] > users[name].character['mana_max'])
                     users[name].character['mana'] = users[name].character['mana_max'];
-                //Перезапускаем реген
-                regen_hp();
-                regen_mp();
-                logger.info(users[name].character);
-                callback({hp:users[name].character['health'],
-                    hp_max:users[name].character['health_max'],
-                    hp_reg:users[name].character['health_reg'],
-                    mp:users[name].character['mana'],
-                    mp_max:users[name].character['mana_max'],
-                    mp_reg:users[name].character['mana_reg']})
+
+                io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
             });
     });
 
@@ -460,8 +440,6 @@ io.on('connection', function (socket) {
     socket.on('great_battle_with_mob',function(battle_id,callback){
         if(users[name].main_status.battle == 0){
             checkLife(name);
-            //Отправляем актуальное состояние
-            io.to(users[name].s_id).emit('char_status',users[name].main_status);
             if(battle_id != 'last'){
                 users[name].battle.last = battle_id;
             }
@@ -472,6 +450,8 @@ io.on('connection', function (socket) {
                 }
             }
             users[name].main_status.battle = 1;
+            //Меняем реген в зависимости от состояния персонажа
+            io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
 
             users[name].battle.id = randWDclassic(20);
             battles[users[name].battle.id] = new Object();
@@ -488,14 +468,19 @@ io.on('connection', function (socket) {
             connection.queryRow(
                 'SELECT * FROM battles_with_mobs WHERE id = ?', [users[name].battle.last],
                 function(err, row){
-                    battles[users[name].battle.id].rounds = row['rounds'];
-                    battles[users[name].battle.id].list_of_mobs = new Array();
-                    for(var i = 0;i < row['rounds']; i++){
-                        if(row['round' + (i + 1)] != null){
-                            battles[users[name].battle.id].list_of_mobs[i] = row['round' + (i + 1)];
+                    if(row){
+                        battles[users[name].battle.id].rounds = row['rounds'];
+                        battles[users[name].battle.id].list_of_mobs = new Array();
+                        for(var i = 0;i < row['rounds']; i++){
+                            if(row['round' + (i + 1)] != null){
+                                battles[users[name].battle.id].list_of_mobs[i] = row['round' + (i + 1)];
+                            }
                         }
+                        greatRound(battles[users[name].battle.id].list_of_mobs,1);
                     }
-                    greatRound(battles[users[name].battle.id].list_of_mobs,1);
+                    else{
+                        logger.warn('Пользователь ' + name + ' пытался создать недоступный бой!');
+                    }
                     callback();
                 });
         }
@@ -507,7 +492,8 @@ io.on('connection', function (socket) {
     //---------------------------
     socket.on('get_battle',function(data,callback){
         if(users[name].character && users[name].main_status.battle == 1){
-            callback(battles[users[name].battle.id]);
+            change_target(battles[users[name].battle.id],users[name].main_status.target.group,-1);
+            callback();
         }
     });
     //------------------------Действия---------------------------------\\
@@ -537,14 +523,9 @@ io.on('connection', function (socket) {
                 '[' + battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number].level + ']',hit:hit_to});
 
             if(hit_to.hit == 1){
-                var time = new Date();
-                battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] = battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] +
-                    battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_reg'] *
-                    (time.getTime() - battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_reg_time'])/1000 - hit_to.dmg;
-                battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_reg_time'] = time.getTime();
-                if(battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] > battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_max']){
-                    battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] = battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health_max'];
-                }
+                battles[users[name].battle.id].round[users[name].main_status.target.group] = hp_mob(battles[users[name].battle.id].round[users[name].main_status.target.group]);
+
+                battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'] -= hit_to.dmg;
                 hit_to.hp_target = battles[users[name].battle.id].round[users[name].main_status.target.group][users[name].main_status.target.number]['health'];
 
                 if(hit_to.hp_target <= 0){
@@ -562,7 +543,7 @@ io.on('connection', function (socket) {
 
                     //Проверяем, есть ли еще живые мобы в данном раунде
                     var check = true;
-                    for(var i = 0; i < battles[users[name].battle.id].round[users[name].main_status.target.group].lenght;i++){
+                    for(var i = 0; i < battles[users[name].battle.id].round[users[name].main_status.target.group].length;i++){
                         if(battles[users[name].battle.id].round[users[name].main_status.target.group][i]['health'] > 0){
                             check = false;
                         }
@@ -574,6 +555,8 @@ io.on('connection', function (socket) {
                             finishBattle(users[name].battle.id);
                             users[name].battle = {type:'none',last:users[name].battle.last};
                             users[name].main_status.battle = 0;
+                            //Меняем реген в зависимости от состояния персонажа
+                            io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
                         }
                         else{
                             users[name].battle.status = 0;
@@ -587,7 +570,7 @@ io.on('connection', function (socket) {
                         }
                     }
                     else{
-                        users[name].battle.target = getTarget(users[name].battle.round,-1);
+                        change_target(battles[users[name].battle.id],users[name].main_status.target.group,-1);
                         hit_to.battle = users[name].battle;
                     }
 
@@ -602,12 +585,14 @@ io.on('connection', function (socket) {
 
     });
     socket.on('change_target',function(data,callback){
-
+        change_target(battles[users[name].battle.id],users[name].main_status.target.group,users[name].main_status.target.number);
+        callback();
     });
     socket.on('action_health_bottle',function(data){
         if(users[name].main_status.bottles.hp_c == 0 && users[name].character['health'] != users[name].character['health_max'] && users[name].character['health'] > 0){
             var i = 0;
             var hp_plus = setInterval(function(){
+                hp_mp(name);
                 if(users[name].character['health'] != 0){
                     var hp = users[name].character['health'] + users[name].character['health_max']/100*12;
                     if (hp > users[name].character['health_max']){
@@ -642,6 +627,7 @@ io.on('connection', function (socket) {
         if(users[name].main_status.bottles.mp_c == 0 && users[name].character['mana'] != users[name].character['mana_max'] && users[name].character['health'] > 0){
             var i = 0;
             var mp_plus = setInterval(function(){
+                hp_mp(name)
                 if(users[name].character['health'] != 0) {
                     var mp = users[name].character['mana'] + users[name].character['mana_max'] / 100 * 12;
                     if (mp > users[name].character['mana_max']) {
@@ -717,7 +703,8 @@ io.on('connection', function (socket) {
 
 
     socket.on('death_info',function(data,callback){
-        callback(users[name].death);
+        var t = new Date();
+        callback(users[name].death - t.getTime());
     });
     socket.on('resurrection',function(data,callback){
         if(users[name].character['health'] == 0){
@@ -725,6 +712,9 @@ io.on('connection', function (socket) {
             switch (data){
                 case 'self':
                     users[name].main_status.battle = 0;
+                    //Меняем реген в зависимости от состояния персонажа
+                    io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
+
                     users[name].death = t.getTime() + users[name].character['level']*1000;
                     var exp = (users[name].character['exp_need']-users[name].character['exp_was'])/100*5;
                     //Опыт
@@ -736,14 +726,8 @@ io.on('connection', function (socket) {
                         users[name].death = null;
                         users[name].character['health'] = users[name].character['health_max']/10;
                         users[name].character['mana'] = users[name].character['mana_max']/10;
-                        regen_hp();
-                        regen_mp();
-                        callback({hp:users[name].character['health'],
-                            hp_max:users[name].character['health_max'],
-                            hp_reg:users[name].character['health_reg'],
-                            mp:users[name].character['mana'],
-                            mp_max:users[name].character['mana_max'],
-                            mp_reg:users[name].character['mana_reg']});
+                        users[name].character['reg_time'] = t.getTime();
+                        callback(hp_mp(name));
                     }
                     return;
 
@@ -753,6 +737,10 @@ io.on('connection', function (socket) {
     });
     socket.on('leave_battle',function(type,callback){
         users[name].main_status.battle = 0;
+        //Меняем реген в зависимости от состояния персонажа
+        io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
+        io.to(users[name].s_id).emit('char_status',users[name].main_status);
+
         var loc = "";
         if(users[name].battle.id != undefined){
             if(battles[users[name].battle.id].round && battles[users[name].battle.id].type == 'mob'){
@@ -783,49 +771,57 @@ io.on('connection', function (socket) {
         return room_users;
     }
 
-    //Регенерация
-    function regen_hp(){
-        hp_reg = setInterval(function(){
-            if(users[name]){
-                if(users[name].character['health'] < users[name].character['health_max']){
-                    if(users[name].character['health'] > 0){
-                        if(users[name].main_status.battle) users[name].character['health'] += users[name].character['health_reg'];
-                        else users[name].character['health'] += users[name].character['health_reg']*2;
-                        if(users[name].character['health'] > users[name].character['health_max']){
-                            users[name].character['health'] = users[name].character['health_max'];
-                        }
-                    }
-                    else{
-                        clearInterval(hp_reg);
-                        clearInterval(mp_reg);
-                        users[name].character['mana'] = 0;
-                        users[name].main_status.battle = 0;
-                    }
-                }
-            }
-        },1000);
-    }
-    function regen_mp(){
-        mp_reg = setInterval(function(){
-            if(users[name]){
-                if(users[name].character['mana'] < users[name].character['mana_max']){
-                    if(users[name].main_status.battle) users[name].character['mana'] += users[name].character['mana_reg'];
-                    else users[name].character['mana'] += users[name].character['mana_reg']*2;
-                    if(users[name].character['mana'] > users[name].character['mana_max']){
-                        users[name].character['mana'] = users[name].character['mana_max'];
-                    }
-                }
-            }
-        },1000);
-    }
-    //Здоровье и мана
+    //Здоровье и мана персонажа
     function hp_mp(name){
+        var time = new Date();
+
+        if(users[name].character['health'] > 0){
+            if(users[name].main_status.battle){
+                var ex = 1;
+            }
+            else{
+                var ex = 2;
+            }
+
+            users[name].character['health'] = users[name].character['health'] + users[name].character['health_reg'] *
+            (time.getTime() - users[name].character['reg_time'])/1000*ex;
+            if(users[name].character['health'] > users[name].character['health_max']){
+                users[name].character['health'] = users[name].character['health_max'];
+            }
+
+            users[name].character['mana'] = users[name].character['mana'] + users[name].character['mana_reg'] *
+            (time.getTime() - users[name].character['reg_time'])/1000*ex;
+            if(users[name].character['mana'] > users[name].character['mana_max']){
+                users[name].character['mana'] = users[name].character['mana_max'];
+            }
+        }
+
+        users[name].character['reg_time'] = time.getTime();
+
         return {hp:users[name].character['health'],
             hp_max:users[name].character['health_max'],
             hp_reg:users[name].character['health_reg'],
             mp:users[name].character['mana'],
             mp_max:users[name].character['mana_max'],
             mp_reg:users[name].character['mana_reg']}
+    }
+    //Здоровье моба
+    function hp_mob(stats){
+        var time = new Date();
+
+        for(var i = 0; i < stats.length; i++){
+            if(stats[i]['health'] > 0){
+                stats[i]['health'] = stats[i]['health'] + stats[i]['health_reg'] * (time.getTime() - stats[i]['reg_time'])/1000;
+                if(stats[i]['health'] > stats[i]['health_max']){
+                    stats[i]['health'] = stats[i]['health_max'];
+                }
+            }
+
+            stats[i]['reg_time'] = time.getTime();
+
+        }
+        return stats;
+
     }
     //Удаление пользователя
     function delete_user(nick){
@@ -909,7 +905,9 @@ io.on('connection', function (socket) {
                 }
             }
             users[name].main_status.target = {number:getTarget(battle.round[group],exclude),group:group,count:summ};
-            io.to(users[name].s_id).emit('char_status',users[name].main_status);
+            battles[users[name].battle.id].round[group] = hp_mob(battles[users[name].battle.id].round[group]);
+            io.to(socket.id).emit('round',{battle:battles[users[name].battle.id],char:users[name].main_status});
+            logger.warn(users[name].main_status);
         }
     }
     //Получение случайной цели
@@ -922,7 +920,7 @@ io.on('connection', function (socket) {
             }
             i++;
         }
-        if(summ == 0){
+        if(summ == 0 && exclude != -1){
             return exclude;
         }
         var chance = Math.floor((Math.random()*summ)+1);
@@ -955,12 +953,11 @@ io.on('connection', function (socket) {
                         //Перебираем количество мобов
                         while(count != parseInt(mob_amount)){
                             battles[users[name].battle.id].round[1][battles[users[name].battle.id].round[1].length] = generationMob(mob_stats);
-                            if(mobs.length == battles[users[name].battle.id].round[1].length){
-                                io.to(socket.id).emit('round_ready',battles[users[name].battle.id]);
-                                change_target(battles[users[name].battle.id],1,-1);
-                            }
+                            var timee = new Date();
+                            battles[users[name].battle.id].round[1][battles[users[name].battle.id].round[1].length - 1].reg_time = timee.getTime();
                             count++;
                         }
+                        change_target(battles[users[name].battle.id],1,-1);
                     });
             }
             selectMob(mob[0],mob[1]);
@@ -1074,6 +1071,7 @@ io.on('connection', function (socket) {
                 else{
                     var mob_hit = hit(users[battles[battle_id].round[1][number].target].character,battles[battle_id].round[1][number],0);
                     if(mob_hit.hit == 1){
+                        hp_mp(battles[battle_id].round[1][number].target);
                         users[battles[battle_id].round[1][number].target].character['health'] -= mob_hit.dmg;
                         if(users[battles[battle_id].round[1][number].target].character['health'] < 0){
                             users[battles[battle_id].round[1][number].target].character['health'] = 0;
@@ -1086,9 +1084,6 @@ io.on('connection', function (socket) {
                 }
             }
         },battles[battle_id].round[1][number].aspeed * 1000);
-
-        var timee = new Date();
-        battles[battle_id].round[1][number].health_reg_time = timee.getTime();
     };
     //Завершение боя
     function finishBattle(battle_id){
