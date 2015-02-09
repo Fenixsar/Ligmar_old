@@ -101,7 +101,7 @@ $(document).ready(function(){
             if(data.name == 'hp_mp'){
                 hp_mp(data.value);
                 if(data.battle){
-                    Ajax('../work/battle.php',undefined,function(){
+                    Ajax('../work/battle.php',undefined,undefined,function(){
                         $('#home').html('Покинуть бой').removeClass('active');
                         main_socket.emit('get_battle',0,function(){});
                     });

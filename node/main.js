@@ -550,23 +550,22 @@ io.on('connection', function (socket) {
                     }
                     if(check){
                         //Здесь должна быть функция завершения раунда
-                        if(users[name].battle.rounds == users[name].battle.round_n){
+                        if(battles[users[name].battle.id].rounds == battles[users[name].battle.id].round_n){
                             hit_to.f_b = 1;
                             finishBattle(users[name].battle.id);
-                            users[name].battle = {type:'none',last:users[name].battle.last};
+                            users[name].battle = {last:users[name].battle.last};
                             users[name].main_status.battle = 0;
                             //Меняем реген в зависимости от состояния персонажа
                             io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
                         }
                         else{
-                            users[name].battle.status = 0;
-                            users[name].battle.target = 0;
-                            users[name].battle.round_n++;
-                            users[name].battle.round = new Array();
+                            battles[users[name].battle.id].round_n++;
+                            battles[users[name].battle.id].status = 0;
+                            battles[users[name].battle.id].round[1] = new Array();
 
                             hit_to.f_r = 1;
 
-                            greatRound(users[name].battle.list_of_mobs,users[name].battle.round_n,1);
+                            greatRound(battles[users[name].battle.id].list_of_mobs,battles[users[name].battle.id].round_n);
                         }
                     }
                     else{
@@ -907,7 +906,6 @@ io.on('connection', function (socket) {
             users[name].main_status.target = {number:getTarget(battle.round[group],exclude),group:group,count:summ};
             battles[users[name].battle.id].round[group] = hp_mob(battles[users[name].battle.id].round[group]);
             io.to(socket.id).emit('round',{battle:battles[users[name].battle.id],char:users[name].main_status});
-            logger.warn(users[name].main_status);
         }
     }
     //Получение случайной цели

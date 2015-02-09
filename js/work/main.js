@@ -40,17 +40,20 @@ var wait = '<div id="wait_loading_game"><div id="Gen" class="row">' +
     '<div class="block" id="rotate_08"></div>' +
     '</div><div id="timer_text" class="row">Загрузка...</div></div>';
 
-function Ajax(url,param,callback){
+function Ajax(url,param,selector,callback){
+    if(selector == undefined){
+        selector = "#game";
+    }
     $('#game').css('height',$('#game').css('height'));
     $.ajax({
         beforeSend: function(){
-            $('#game').html(wait);
+            $(selector).html(wait);
         },
         url: url,
         type: 'POST',
         data: param,
         error: function(){
-            $('#game').html('<span style="color: red">При загрузке произошла ошибка, обновите страницу.</span>');
+            $(selector).html('<span style="color: red">При загрузке произошла ошибка, обновите страницу.</span>');
         },
         success: function(data){
             //-----------------------В зависимости от полученных данных--------------------\\
@@ -65,7 +68,7 @@ function Ajax(url,param,callback){
                 Ajax('../user/eqip.php');
             }
             else{
-                $('#game').html(data);
+                $(selector).html(data);
                 $('#game').css('height','auto');
             }
             //-----------------------В зависимости от передаваемого параметра---------------\\

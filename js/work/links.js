@@ -12,6 +12,15 @@ function links(socket){
         });
         Ajax('../location/list_of_mobs.php',{name: $(this).attr('name')});
     });
+    //---------------------------------Город--------------------------------------\\
+    $('#game').on('click','#smith',function(){
+        $('#home').removeClass('active');
+        Ajax('../town/smith.php');
+    });
+    $('#game').on('click','#sell_window',function(){
+        $('#home').removeClass('active');
+        Ajax('../town/work/sell.php',undefined,"#trade_area");
+    });
     //----------------------------------Герой----------------------------------------\\
     $('#game').on('click','#eqip',function(){
         $('#hero').removeClass('active');

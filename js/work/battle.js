@@ -116,7 +116,7 @@ function battle(main_socket){
     //-------------------------------1----------------------------------
     $('#game').on('click', '.great_battle',function(){
         var temp_battle_id = $(this).attr("battle_id")
-        Ajax('../work/battle.php',undefined,function(){
+        Ajax('../work/battle.php',undefined,undefined,function(){
             $('#home').html('Покинуть бой');
             main_socket.emit('great_battle_with_mob', temp_battle_id,function(){});
         });
