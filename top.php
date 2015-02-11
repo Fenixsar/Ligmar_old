@@ -18,7 +18,7 @@ echo '<div class="row"><div class="col-xs-3"><div class="progress" style="margin
 echo '<div class="col-xs-6" style="text-align:center;font-size: 16px; font-weight: bold"><img src="../img/warrior18x18.gif"><span id ="name" name="' . $user->array['id'] . '">' . $user->array['name'] .'</span>(<span id="char_lvl">' . $user->array['level'] . '</span>)</div>
     <div class="col-xs-3"><div id="ping" style="float:right"></div><div id="notification_small" style="float:right;margin-right:15px;cursor: pointer;" value="0"></div></div></div>';
 echo '<div class="exp1" title="asdfads"><div id="exp_bar" style="background:#FFDF8C; height:1px; width:' . $exp  . '%;"></div></div>';
-echo '<div id="exp_amount" style="text-align: center; font-size: 10px; margin-bottom: 10px">' . $user->array['exp'] . '/' . $user->array['exp_need'] . '(' . $exp . '%)</div>';
+echo '<div id="exp_amount" style="text-align: center; font-size: 10px; margin-bottom: 2px">' . $user->array['exp'] . '/' . $user->array['exp_need'] . '(' . $exp . '%)</div>';
 ////Группа
 //if($user->array['party']){
 //    $party = $user->getParty();

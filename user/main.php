@@ -66,12 +66,12 @@ if($user_id != 0){
     <div class="row">
         <div class="col-sm-6">
             <ul class="char">
-                <li class="char">Зелья здоровья<span id="health_bottles_hero" class="char"></span></li>
+                <li class="char"><img src="../img/icons/zdorovye.png"> Зелья здоровья<span id="health_bottles_hero" class="char"></span></li>
             </ul>
         </div>
         <div class="col-sm-6">
             <ul class="char">
-                <li class="char">Зелья маны<span id="mana_bottles_hero" class="char"></span></li>
+                <li class="char"><img src="../img/icons/mana.png"> Зелья маны<span id="mana_bottles_hero" class="char"></span></li>
             </ul>
         </div>
     </div>
@@ -79,18 +79,25 @@ if($user_id != 0){
     <div class="row">
         <div class="col-sm-6">
             <ul class="char">
-                <li class="char">Древесина<span id="wood_hero" class="char"></span></li>
-                <li class="char">Руда<span id="ore_hero" class="char"></span></li>
+                <li class="char"><img src="../img/icons/derevo.png"> Древесина<span id="wood_hero" class="char"></span></li>
+                <li class="char"><img src="../img/icons/ruda.png"> Руда<span id="ore_hero" class="char"></span></li>
             </ul>
         </div>
         <div class="col-sm-6">
             <ul class="char">
-                <li class="char">Нить<span id="thread_hero" class="char"></span></li>
-                <li class="char">Кожа<span id="leather_hero" class="char"></span></li>
+                <li class="char"><img src="../img/icons/nit.png"> Нить<span id="thread_hero" class="char"></span></li>
+                <li class="char"><img src="../img/icons/kozha.png"> Кожа<span id="leather_hero" class="char"></span></li>
             </ul>
         </div>
     </div>
     <hr class="main">
+        <div class="row">
+        <div class="col-sm-6">
+            <ul class="char">
+                <li class="char"><img src="../img/icons/zoloto.png"> Золото<span id="gold_hero" class="char">4345</span></li>
+            </ul>
+        </div>
+    </div>
     </div>';
 
 

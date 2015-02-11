@@ -41,7 +41,11 @@ var wait = '<div id="wait_loading_game"><div id="Gen" class="row">' +
     '</div><div id="timer_text" class="row">Загрузка...</div></div>';
 
 function Ajax(url,param,selector,callback){
-    if(selector == undefined){
+    if(typeof selector == "object"){
+        var where = selector.where;
+        selector = selector.selector;
+    }
+    else if(selector == undefined){
         selector = "#game";
     }
     $('#game').css('height',$('#game').css('height'));
@@ -68,7 +72,12 @@ function Ajax(url,param,selector,callback){
                 Ajax('../user/eqip.php');
             }
             else{
-                $(selector).html(data);
+                if(where == "append"){
+                    $(selector).append(data);
+                }
+                else{
+                    $(selector).html(data);
+                }
                 $('#game').css('height','auto');
             }
             //-----------------------В зависимости от передаваемого параметра---------------\\

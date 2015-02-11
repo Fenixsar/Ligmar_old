@@ -272,10 +272,11 @@ $(document).ready(function(){
 
     //Ping
     function ping(){
-        setInterval(function(){
+        setTimeout(function(){
             var startTime = Date.now();
             main_socket.emit('ping',function(){
-                $('#ping').html((Date.now() - startTime) + 'мс')
+                $('#ping').html((Date.now() - startTime) + 'мс');
+                ping();
             });
         },1000);
     }

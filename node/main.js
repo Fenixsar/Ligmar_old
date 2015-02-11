@@ -1,37 +1,32 @@
-/**
- * Created by root on 6/16/14.
- */
 //Подключение socket.io
 var io = require('socket.io').listen(852);
 //Настройки конфигурации socket.io
 io.set('heartbeat interval', 10000);
+
+io.use(function(socket, next){
+    if (socket.request.headers.cookie){
+        return next();
+    }
+    next(new Error('Authentication error'));
+});
 
 //Подключение логера
 var log4js = require('log4js');
 var logger = log4js.getLogger();
 logger.setLevel('info');
 
-//Подключение MySQL
-var mysql = require('/var/www/node_modules/mysql-utilities/node_modules/mysql');
-mysqlUtilities = require('/var/www/node_modules/mysql-utilities');
-
-//Настройки конфигурации mysql
-var connection = mysql.createConnection({
-    host:   'localhost',
-    user:   'root',
-    password:   '53Hpontar',
-    database:   'game'
-});
-connection.connect();
-mysqlUtilities.upgrade(connection);
-mysqlUtilities.introspection(connection);
+//MySQL
+var con = require('../node/mysql.js');
+connection = con.c;
 
 //Переменные
-var users = new Array();
+users = new Array();
 var battles = new Array();
 var mobs = new Array();
 
+var items = require('../node/items.js');
 
+items(io);
 //Удар
 function hit(target,char,lh){
     var timee = new Date();
@@ -101,10 +96,10 @@ function hit(target,char,lh){
 }
 
 
+
+
 io.on('connection', function (socket) {
     var name = undefined;
-    var hp_reg = null;
-    var mp_reg = null;
 
     var list_group_invate = Array();
 
@@ -218,10 +213,6 @@ io.on('connection', function (socket) {
         }
         //Очищаем память
         delete socket.adapter.rooms[socket.id];
-    });
-    //Ping
-    socket.on('ping',function(pong){
-        pong();
     });
     //UpdateAllStats
     socket.on('updateAllStats', function(data){
@@ -449,9 +440,9 @@ io.on('connection', function (socket) {
                     io.sockets.connected[users[name].s_id].disconnect();
                 }
             }
-            users[name].main_status.battle = 1;
             //Меняем реген в зависимости от состояния персонажа
             io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
+            users[name].main_status.battle = 1;
 
             users[name].battle.id = randWDclassic(20);
             battles[users[name].battle.id] = new Object();
@@ -554,9 +545,9 @@ io.on('connection', function (socket) {
                             hit_to.f_b = 1;
                             finishBattle(users[name].battle.id);
                             users[name].battle = {last:users[name].battle.last};
-                            users[name].main_status.battle = 0;
                             //Меняем реген в зависимости от состояния персонажа
                             io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
+                            users[name].main_status.battle = 0;
                         }
                         else{
                             battles[users[name].battle.id].round_n++;
@@ -711,8 +702,6 @@ io.on('connection', function (socket) {
             switch (data){
                 case 'self':
                     users[name].main_status.battle = 0;
-                    //Меняем реген в зависимости от состояния персонажа
-                    io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
 
                     users[name].death = t.getTime() + users[name].character['level']*1000;
                     var exp = (users[name].character['exp_need']-users[name].character['exp_was'])/100*5;
@@ -735,9 +724,10 @@ io.on('connection', function (socket) {
 
     });
     socket.on('leave_battle',function(type,callback){
-        users[name].main_status.battle = 0;
         //Меняем реген в зависимости от состояния персонажа
         io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
+        users[name].main_status.battle = 0;
+
         io.to(users[name].s_id).emit('char_status',users[name].main_status);
 
         var loc = "";
@@ -844,15 +834,13 @@ io.on('connection', function (socket) {
                     }
                 }
                 if(del){
-                    //Убираем реген
-                    clearInterval(hp_reg);
-                    clearInterval(mp_reg);
-
                     users.splice(users.indexOf(nick),1);
                     logger.info('Пользователь отсоеденился: ' + nick);
                     logger.info('Всего пользователей: ' + users.length + ', а конкретно: ' + users);
 
+
                     //Обновление данных персонажа
+                    hp_mp(name);
                     if(users[name].death){
                         var death = users[name].death;
                     }
@@ -1806,3 +1794,4 @@ io.on('connection', function (socket) {
     }
 });
 
+exports.all = io;

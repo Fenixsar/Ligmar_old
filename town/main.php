@@ -27,7 +27,7 @@ echo '</div>';
 echo '<hr class="main">';
 
 echo '<div class="row">';
-echo '<div class="col-xs-4"><button id="smith" class="btn-main" disabled>Кузнец</button></div>';
+echo '<div class="col-xs-4"><button id="smith" class="btn-main">Кузнец</button></div>';
 echo '<div class="col-xs-4" style="padding: 0 1px"><button class="btn-main" disabled>Портной</button></div>';
 echo '<div class="col-xs-4"><button class="btn-main" disabled>Ремесленник</button></div>';
 echo '</div>';

@@ -19,25 +19,111 @@ function links(socket){
     });
     $('#game').on('click','#sell_window',function(){
         $('#home').removeClass('active');
-        Ajax('../town/work/sell.php',undefined,"#trade_area");
+        Ajax('../town/work/sell.php',undefined,"#things_area",function(){
+            $('#items_list').html(wait);
+            socket.emit("get_things","bag",function(things){
+                if(things){
+                    things.forEach(function(thing) {
+                        thing.action_1 = {type: "sell"};
+                        thing.action_2 = {type: "break"};
+                        Ajax('../town/work/thing.php', thing, {selector: "#items_list", where: "append"}, function () {
+                            $('#things_area').find("#wait_loading_game").remove();
+                        });
+                    });
+                }
+                else{
+                    $('#items_list').find("#wait_loading_game").remove();
+                }
+            });
+        });
     });
     //----------------------------------Герой----------------------------------------\\
     $('#game').on('click','#eqip',function(){
         $('#hero').removeClass('active');
-        Ajax('../user/eqip.php');
+        Ajax('../user/eqip_bag_box.php',{type:"Снаряжение"},undefined,function(){
+            socket.emit("get_box_bag_stat","",function(stats){
+                $("#count_bag").html("(" + stats.bag_count + "/" + stats.bag + ")");
+                $("#count_box").html("(" + stats.box_count + "/" + stats.box + ")");
+            });
+            $('#items_list').html(wait);
+            socket.emit("get_things","eqip",function(things){
+                things.forEach(function(thing) {
+                    if(thing.id_thing){
+                        thing.thing.action_0 = 'eqip';
+                        Ajax('../town/work/thing.php', thing.thing, {selector: "#items_list", where: "append"}, function () {
+                            $('#items_list').find("#wait_loading_game").remove();
+                        });
+                    }
+                    else if(thing.id_thing === null){
+                        Ajax('../town/work/thing.php', thing, {selector: "#items_list", where: "append"}, function () {
+                            $('#items_list').find("#wait_loading_game").remove();
+                        });
+                    }
+
+                });
+            });
+        });
     }).on('click','#bag',function(){
         $('#hero').removeClass('active');
-        Ajax('../user/bag.php');
+        Ajax('../user/eqip_bag_box.php',{type:"Рюкзак"},undefined,function(){
+            socket.emit("get_box_bag_stat","",function(stats){
+                $("#count_bag").html("(" + stats.bag_count + "/" + stats.bag + ")");
+                $("#count_box").html("(" + stats.box_count + "/" + stats.box + ")");
+            });
+            $('#items_list').html(wait);
+            socket.emit("get_things","bag",function(things){
+                if(things){
+                    things.forEach(function(thing) {
+                        thing.action_1 = {type: "eqip"};
+                        thing.action_2 = {type: "box"};
+                        Ajax('../town/work/thing.php', thing, {selector: "#items_list", where: "append"}, function () {
+                            $('#items_list').find("#wait_loading_game").remove();
+                        });
+                    });
+                }
+                else{
+                    $('#items_list').find("#wait_loading_game").remove();
+                }
+            });
+        });
     }).on('click','#box',function(){
         $('#hero').removeClass('active');
-        Ajax('../user/box.php');
+        Ajax('../user/eqip_bag_box.php',{type:"Сундук"},undefined,function(){
+            socket.emit("get_box_bag_stat","",function(stats){
+                $("#count_bag").html("(" + stats.bag_count + "/" + stats.bag + ")");
+                $("#count_box").html("(" + stats.box_count + "/" + stats.box + ")");
+            });
+            $('#items_list').html(wait);
+            socket.emit("get_things","box",function(things){
+                if(things){
+                    things.forEach(function(thing) {
+                        thing.action_1 = {type: "eqip"};
+                        thing.action_2 = {type: "bag"};
+                        Ajax('../town/work/thing.php', thing, {selector: "#items_list", where: "append"}, function () {
+                            $('#items_list').find("#wait_loading_game").remove();
+                        });
+                    });
+                }
+                else{
+                    $('#items_list').find("#wait_loading_game").remove();
+                }
+            });
+        });
     }).on('click','#casket',function(){
         $('#hero').removeClass('active');
         Ajax('../user/casket.php');
     });
     //----------------------------------Предметы----------------------------------------\\
+
+
     $('#game').on('click','.btn-thing',function(){
-        Ajax('../user/thing.php',{t:$(this).attr('thing_id')});
+        $('#things_area').html(wait);
+        resize();
+
+        socket.emit("get_thing",$(this).attr('thing_id'),function(thing){
+            console.log(thing);
+            Ajax('../town/work/thing_full.php',thing,"#things_area");
+        });
     }).on('click','.put_to',function(){
         Ajax('../ajax/put_to.php',{t:$(this).attr('thing_id'), to:$(this).attr('to')});
     });
