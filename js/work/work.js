@@ -4,7 +4,7 @@
 
 
 //Подключение
-var main_socket = io.connect('http://81.177.142.213:852', {
+var main_socket = io.connect('http://ligmar.ru:852', {
 //var main_socket = io.connect('http://localhost:852', {
 //var main_socket = io.connect('192.168.0.103:852', {
     'reconnect': false,
