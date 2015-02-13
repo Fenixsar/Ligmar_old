@@ -4,9 +4,9 @@
 
 
 //Подключение
-//var main_socket = io.connect('http://ligmar.ru:852', {
+var main_socket = io.connect('http://ligmar.ru:852', {
 //var main_socket = io.connect('http://localhost:852', {
-var main_socket = io.connect('192.168.0.103:852', {
+//var main_socket = io.connect('192.168.0.103:852', {
     'reconnect': false,
     'reconnectionDelay': 1000,
     'reconnectionDelayMax': 5000
