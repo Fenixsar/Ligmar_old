@@ -11,7 +11,7 @@ echo '</div></div>';
 echo '<div id="footer"><div class="user_menu row">
     <div class="col-xs-4"><button id="home" class="btn-footer active">Город</button></div>
     <div class="col-xs-4" style="padding: 0 1px"><button id="guild" class="btn-footer" disabled>Гильдия</button></div>
-    <div class="col-xs-4"><button id="hero" class="btn-footer">Герой</button></div>
+    <div class="col-xs-4"><button id="hero" class="btn-footer">Герой <img id="add_char_plus" src="../img/plus.png" width="20px;" style="display: none"></button></div>
 </div>';
 
 echo '<div style="text-align: center"><span id="server_time">-:--:-</span>  |  ';

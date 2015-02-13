@@ -24,9 +24,10 @@ users = new Array();
 var battles = new Array();
 var mobs = new Array();
 
-var items = require('../node/items.js');
-
-items(io);
+//Связь с вещами
+var items = require('../node/items.js').items(io);
+var items_events = require('../node/items.js').events;
+var getThing = require('../node/items.js').getThing;
 //Удар
 function hit(target,char,lh){
     var timee = new Date();
@@ -136,6 +137,7 @@ io.on('connection', function (socket) {
 
                         users[name].main_status.bottles = {hp:row['hp_b'],mp:row['mp_b'],hp_c:0,mp_c:0};
                         users[name].main_status.aspeed = row['aspeed'];
+                        users[name].main_status.free_char = row['free_char'];
 
                         //Получаем данные с аккаунта
                         connection.queryRow('SELECT * FROM users WHERE id = ?', [row['user']],
@@ -214,44 +216,6 @@ io.on('connection', function (socket) {
         //Очищаем память
         delete socket.adapter.rooms[socket.id];
     });
-    //UpdateAllStats
-    socket.on('updateAllStats', function(data){
-        connection.queryRow('SELECT * FROM characters WHERE name = ?', [name],
-            function(err, row){
-                users[name].character['level'] = row['level'];
-                users[name].character['str_self'] = row['str_self'];
-                users[name].character['dex_self'] = row['dex_self'];
-                users[name].character['vit_self'] = row['vit_self'];
-                users[name].character['int_self'] = row['int_self'];
-                users[name].character['str'] = row['str'];
-                users[name].character['dex'] = row['dex'];
-                users[name].character['vit'] = row['vit'];
-                users[name].character['intel'] = row['intel'];
-                users[name].character['health_max'] = row['health_max'];
-                users[name].character['health_reg'] = row['health_reg'];
-                users[name].character['mana_max'] = row['mana_max'];
-                users[name].character['mana_reg'] = row['mana_reg'];
-                users[name].character['dmg_min'] = row['dmg_min'];
-                users[name].character['dmg_max'] = row['dmg_max'];
-                users[name].character['dmg_type'] = row['dmg_type'];
-                users[name].character['dmg_mag'] = row['dmg_mag'];
-                users[name].character['dmg_strike'] = row['dmg_strike'];
-                users[name].character['strike'] = row['strike'];
-                users[name].character['aspeed'] = row['aspeed'];
-                users[name].character['def'] = row['def'];
-                users[name].character['resist'] = row['resist'];
-                users[name].character['accuracy'] = row['accuracy'];
-                users[name].character['dodge'] = row['dodge'];
-
-                if(users[name].character['health'] > users[name].character['health_max'])
-                    users[name].character['health'] = users[name].character['health_max'];
-                if(users[name].character['mana'] > users[name].character['mana_max'])
-                    users[name].character['mana'] = users[name].character['mana_max'];
-
-                io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
-            });
-    });
-
 
     //Группа
     //socket.on('group',function(nickname,callback){
@@ -424,6 +388,46 @@ io.on('connection', function (socket) {
                     callback(users[name].character);
                 })
         }
+    });
+    socket.on('up_char',function(char,callback){
+        if(users[name].character.free_char){
+            switch (char){
+                case "str":
+                    users[name].character.free_char--;
+                    users[name].main_status.free_char--;
+                    users[name].character.str_self++;
+                    updateAllStats(function(){
+                        callback();
+                    });
+                    break;
+                case "dex":
+                    users[name].character.free_char--;
+                    users[name].main_status.free_char--;
+                    users[name].character.dex_self++;
+                    updateAllStats(function(){
+                        callback();
+                    });
+                    break;
+                case "vit":
+                    users[name].character.free_char--;
+                    users[name].main_status.free_char--;
+                    users[name].character.vit_self++;
+                    updateAllStats(function(){
+                        callback();
+                    });
+                    break;
+                case "int":
+                    users[name].character.free_char--;
+                    users[name].main_status.free_char--;
+                    users[name].character.int_self++;
+                    updateAllStats(function(){
+                        callback();
+                    });
+                    break;
+            }
+            io.to(users[name].s_id).emit('char_status',users[name].main_status);
+        }
+
     });
 
 
@@ -743,6 +747,91 @@ io.on('connection', function (socket) {
         }
         callback(loc);
     });//??????????????????????Куча нюансов
+
+    //------------------------------------Functions--------------------------------------------//
+    function updateAllStats(callback){
+        countAllEqipStat(function(summ_stats){
+            connection.queryRow('SELECT * FROM class WHERE name = ?', [users[name].character.class],
+                function(err, row){
+                    users[name].character.str = summ_stats.str + users[name].character.str_self;
+                    users[name].character.dex = summ_stats.dex + users[name].character.dex_self;
+                    users[name].character.vit = summ_stats.vit + users[name].character.vit_self;
+                    users[name].character.intel = summ_stats.intel + users[name].character.int_self;
+
+                    users[name].character.health_max = users[name].character.vit*row.health_per_vitality +
+                    (users[name].character.level - 1)*row.health_per_lvl + summ_stats.self_hp + summ_stats.hp;
+                    users[name].character.mana_max = users[name].character.intel*row.mana_per_intellect +
+                    (users[name].character.level - 1)*row.mana_per_lvl + summ_stats.self_mana + summ_stats.mp;
+
+                    users[name].character.health_reg = (users[name].character.level + users[name].character.vit/2 + 1)/10 + summ_stats.hp_reg;
+                    users[name].character.mana_reg = (users[name].character.level + users[name].character.intel/2 + 1)/10 + summ_stats.mp_reg;
+
+                    if(users[name].character.class == "Воин"){
+                        users[name].character.dmg_min = Math.round((1 + users[name].character.str/150) *
+                        (users[name].character.level + summ_stats.self_dmg_min));
+                        users[name].character.dmg_max = Math.round((1 + users[name].character.str/150) *
+                        (users[name].character.level + summ_stats.self_dmg_max));
+                    }
+
+                    users[name].character.dmg_mag = summ_stats.dmg_mag;
+                    users[name].character.dmg_strike = Math.round((summ_stats.dmg_strike + users[name].character.dex/100 + 2.2)*100)/100;
+                    users[name].character.strike = Math.ceil(summ_stats.strike + users[name].character.dex/20);
+
+                    users[name].character.def = Math.round((users[name].character.str + users[name].character.vit)/4) +
+                    Math.round(summ_stats.self_def*(1 + Math.round(((2*users[name].character.vit) + (3*users[name].character.str))/25)/100));
+                    users[name].character.resist = Math.round((users[name].character.intel + users[name].character.vit)/4) +
+                    Math.round(summ_stats.self_resist*(1 + Math.round(((2*users[name].character.vit) + (3*users[name].character.intel))/25)/100));
+
+                    users[name].character.accuracy = users[name].character.dex*10 + summ_stats.accur;
+                    if(summ_stats.accur_perc){
+                        users[name].character.accuracy *= summ_stats.accur_perc;
+                    }
+                    users[name].character.dodge = users[name].character.dex*10 + summ_stats.self_dodge;
+                    io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
+                    if(callback){
+                        callback();
+                    }
+                });
+        });
+    }
+    //Подсчет общих статов снаряжения
+    function countAllEqipStat(callback){
+        connection.queryRow('SELECT weapon, head, shoulders, neck, chest, hands, finger, belt, legs, foot FROM equipment WHERE id = ?', [users[name].character.id],
+            function(err, row){
+                var count = 0;
+                var count_1 = 0;
+                var check = true;
+                for (var type in row) {
+                    if(row[type] != null){
+                        check = false;
+                        count++;
+                        var summ = undefined;
+                        getThing(row[type],function(thing){
+                            count_1++;
+                            if(thing){
+                                if(summ == undefined){
+                                    summ = thing;
+                                }
+                                else{
+                                    for (var stat in thing) {
+                                        summ[stat] += thing[stat];
+                                    }
+                                }
+                                if(count == count_1){
+                                    callback(summ);
+                                }
+                            }
+                            else{
+                                callback(0);
+                            }
+                        });
+                    }
+                }
+                if(check){
+                    callback(0);
+                }
+            });
+    }
 
 
     //Chat function
@@ -1591,14 +1680,29 @@ io.on('connection', function (socket) {
                                         if(thing_1['def_perc']) thing_1['self_def'] = Math.round(thing_1['self_def'] * (thing_1['def_perc']/100 + 1));
                                         if(thing_1['resist_perc']) thing_1['self_resist'] = Math.round(thing_1['self_def'] * (thing_1['resist_perc']/100 + 1));
                                         if(thing_1['main_type'] == 'weapon'){
-                                            if(thing_1['dmg']) {
-                                                thing_1['self_dmg_min'] += thing_1['dmg'];
-                                                thing_1['self_dmg_max'] += thing_1['dmg'];
-                                            }
                                             if(thing_1['dmg_perc']) {
                                                 thing_1['self_dmg_min'] = Math.round(thing_1['self_dmg_min'] * ((thing_1['dmg_perc'] /100) + 1));
                                                 thing_1['self_dmg_max'] = Math.round(thing_1['self_dmg_max'] * ((thing_1['dmg_perc'] /100) + 1));
                                             }
+                                            if(thing_1['dmg']) {
+                                                thing_1['self_dmg_min'] += thing_1['dmg'];
+                                                thing_1['self_dmg_max'] += thing_1['dmg'];
+                                            }
+                                            if(thing_1['dmg_min']) {
+                                                thing_1['self_dmg_min'] += thing_1['dmg_min'];
+                                            }
+                                            if(thing_1['dmg_max']) {
+                                                thing_1['self_dmg_min'] += thing_1['dmg_max'];
+                                            }
+                                        }
+                                        if(thing_1['def']){
+                                            thing_1['self_def'] += thing_1['def'];
+                                        }
+                                        if(thing_1['resist']){
+                                            thing_1['self_resist'] += thing_1['resist'];
+                                        }
+                                        if(thing_1['dodge']){
+                                            thing_1['self_dodge'] += thing_1['dodge'];
                                         }
 
                                         delete thing_1['parse'];
@@ -1792,6 +1896,15 @@ io.on('connection', function (socket) {
             s += abd[Math.random() * aL|0];
         return s;
     }
-});
 
-exports.all = io;
+
+    //----------------------------Events----------------------------------\\
+    items_events.on("hp_mp",function(){
+        io.to(users[name].s_id).emit('hp_mp',hp_mp(name));
+    });
+    items_events.on("updateAllStats",function(){
+        updateAllStats();
+    });
+
+
+});

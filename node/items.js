@@ -1,7 +1,14 @@
+var EventEmitter = require('events').EventEmitter;
+var events = new EventEmitter();
+
 
 var cookieParser = require("cookie-parser");
 
-module.exports = function(io) {
+module.exports.events = events;
+
+module.exports.getThing = getThing;
+
+module.exports.items = function(io) {
     io.sockets.on('connection', function(socket){
         var name = undefined;
         var req = {
@@ -227,6 +234,123 @@ module.exports = function(io) {
             });
         });
 
+        socket.on("put_to",function(data,callback){
+            checkBox(data.thing_id,function(cb){
+                if(cb){
+                    switch (data.to){
+                        case "bag":
+                            checkBagFreePlace(function(cb_free){
+                                if(cb_free){
+                                    var query = {id: users[name].character.id};
+                                    query[cb_free] = data.thing_id;
+                                    connection.update("bags",query,function(err, affectedRows) {});
+                                    query = {id: users[name].character.user};
+                                    query[cb.place] = null;
+                                    connection.update("box",query,function(err, affectedRows) {
+                                        callback();
+                                    });
+                                }
+                            });
+                            break;
+                        case "eqip":
+                            getThing(data.thing_id,function(thing){
+                                getThingFromEqip(thing.main_type,function(cb_eqip){
+                                    var query = {id: users[name].character.user};
+                                    if(cb_eqip){
+                                        query[cb.place] = cb_eqip;
+                                    }
+                                    else{
+                                        query[cb.place] = null;
+                                    }
+                                    connection.update("box",query,function(err, affectedRows) {});
+                                    query = {id: users[name].character.id};
+                                    query[thing.main_type] = data.thing_id;
+                                    connection.update("equipment",query,function(err, affectedRows) {
+                                        events.emit("updateAllStats");
+                                        callback();
+                                    });
+                                });
+                            });
+                    }
+                }
+            });
+            checkBag(data.thing_id,function(cb){
+                if(cb){
+                    switch (data.to){
+                        case "box":
+                            checkBoxFreePlace(function(cb_free){
+                                if(cb_free){
+                                    var query = {id: users[name].character.id};
+                                    query[cb_free] = data.thing_id;
+                                    connection.update("box",query,function(err, affectedRows) {});
+                                    query = {id: users[name].character.user};
+                                    query[cb.place] = null;
+                                    connection.update("bags",query,function(err, affectedRows) {
+                                        callback();
+                                    });
+                                }
+                            });
+                            break;
+                        case "eqip":
+                            getThing(data.thing_id,function(thing){
+                                getThingFromEqip(thing.main_type,function(cb_eqip){
+                                    var query = {id: users[name].character.id};
+                                    if(cb_eqip){
+                                        query[cb.place] = cb_eqip;
+                                    }
+                                    else{
+                                        query[cb.place] = null;
+                                    }
+                                    connection.update("bags",query,function(err, affectedRows) {});
+                                    query = {id: users[name].character.id};
+                                    query[thing.main_type] = data.thing_id;
+                                    connection.update("equipment",query,function(err, affectedRows) {
+                                        events.emit("updateAllStats");
+                                        callback();
+                                    });
+                                });
+                            });
+                    }
+                }
+            });
+            checkEqip(data.thing_id,function(cb){
+                if(cb){
+                    switch (data.to){
+                        case "box":
+                            checkBoxFreePlace(function(cb_free){
+                                if(cb_free){
+                                    var query = {id: users[name].character.id};
+                                    query[cb_free] = data.thing_id;
+                                    connection.update("box",query,function(err, affectedRows) {});
+                                    query = {id: users[name].character.user};
+                                    query[cb.place] = null;
+                                    connection.update("equipment",query,function(err, affectedRows) {
+                                        events.emit("updateAllStats");
+                                        callback();
+                                    });
+                                }
+                            });
+                            break;
+                        case "bag":
+                            checkBagFreePlace(function(cb_free){
+                                if(cb_free){
+                                    var query = {id: users[name].character.id};
+                                    query[cb_free] = data.thing_id;
+                                    connection.update("bags",query,function(err, affectedRows) {});
+                                    query = {id: users[name].character.user};
+                                    query[cb.place] = null;
+                                    connection.update("equipment",query,function(err, affectedRows) {
+                                        events.emit("updateAllStats");
+                                        callback();
+                                    });
+                                }
+                            });
+                            break;
+                    }
+                }
+            });
+        });
+
 
         //Ping
         socket.on('ping',function(pong){
@@ -272,7 +396,7 @@ module.exports = function(io) {
                     for (var key in row) {
                         if(row[key] == thing_id){
                             ch = false;
-                            callback({thing_id:thing_id});
+                            callback({thing_id:thing_id,place:key});
                         }
                     }
                     if(ch){
@@ -282,18 +406,7 @@ module.exports = function(io) {
         }
 
 
-        //Получение полных данных конкретной вещи
-        function getThing(thing_id,callback){
-            connection.queryRow('SELECT * FROM things WHERE id = ?', [thing_id],
-                function(err, row){
-                    if(row){
-                        callback(row);
-                    }
-                    else{
-                        callback(0);
-                    }
-                });
-        }
+
         //Получение id вещи надетой на персонажа
         function getThingFromEqip(thing_type,callback){
             connection.queryRow('SELECT ' + thing_type + ' FROM equipment WHERE id = ?', [users[name].character.id],
@@ -302,7 +415,6 @@ module.exports = function(io) {
                         callback(row[thing_type]);
                     }
                     else{
-                        console.log("af");
                         callback(0);
                     }
                 });
@@ -336,7 +448,7 @@ module.exports = function(io) {
                 check.intel = true;
             }
             if(thing.class.indexOf(users[name].character.class) >= 0 || thing.class == "Все"){
-                check.class = false;
+                check.class = true;
             }
             else{
                 check.class = false;
@@ -396,9 +508,9 @@ module.exports = function(io) {
                 function(err, row){
                     var ch = 0;
                     for (var key in row) {
-                        //if(row[key] != null  && key.indexOf("bag") >= 0){
+                        if(row[key] != null  && key.indexOf("bag") >= 0){
                             ch++;
-                        //}
+                        }
                     }
                     callback(ch);
                 });
@@ -409,14 +521,31 @@ module.exports = function(io) {
                 function(err, row){
                     var ch = 0;
                     for (var key in row) {
-                        //if(row[key] != null && key.indexOf("box") >= 0){
+                        if(row[key] != null && key.indexOf("box") >= 0){
                             ch++;
-                        //}
+                        }
                     }
                     callback(ch);
                 });
         }
+
+
+
+
     });
 
 
 };
+
+//Получение полных данных конкретной вещи
+function getThing(thing_id,callback){
+    connection.queryRow('SELECT * FROM things WHERE id = ?', [thing_id],
+        function(err, row){
+            if(row){
+                callback(row);
+            }
+            else{
+                callback(0);
+            }
+        });
+}

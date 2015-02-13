@@ -4,9 +4,9 @@
 
 
 //Подключение
-var main_socket = io.connect('http://ligmar.ru:852', {
+//var main_socket = io.connect('http://ligmar.ru:852', {
 //var main_socket = io.connect('http://localhost:852', {
-//var main_socket = io.connect('192.168.0.103:852', {
+var main_socket = io.connect('192.168.0.103:852', {
     'reconnect': false,
     'reconnectionDelay': 1000,
     'reconnectionDelayMax': 5000
@@ -183,6 +183,13 @@ $(document).ready(function(){
             }
         };
 
+        if(main_status.free_char){
+            $('#add_char_plus').show();
+        }
+        else{
+            $('#add_char_plus').hide();
+        }
+
     });
     main_socket.on('hp_mp',function(data){
         hp_mp(data);
@@ -321,6 +328,12 @@ $(document).ready(function(){
         $('#notification_green').hide();
     });
 
+    $('#game').on('click' , '.up_char',function(){
+        $('#free_char').html(wait);
+        main_socket.emit("up_char",$(this).attr('char'),function(){
+            Ajax('../user/main.php','hero');
+        });
+    });
 
 
 

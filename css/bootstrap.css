@@ -798,7 +798,7 @@ pre code {
   clear: both;
 }
 
-@media (min-width: 540px) {
+@media (min-width: 520px) {
   .container {
     width: 480px;
   }
@@ -1114,7 +1114,7 @@ pre code {
   margin-left: 0;
 }
 
-@media (min-width: 540px) {
+@media (min-width: 520px) {
   .col-sm-1,
   .col-sm-2,
   .col-sm-3,
@@ -6898,7 +6898,7 @@ td.hidden-xs {
   display: table-cell !important;
 }
 
-@media (max-width: 540px) {
+@media (max-width: 520px) {
   .hidden-xs,
   tr.hidden-xs,
   th.hidden-xs,
@@ -6907,7 +6907,7 @@ td.hidden-xs {
   }
 }
 
-@media (min-width: 540px) and (max-width: 991px) {
+@media (min-width: 520px) and (max-width: 991px) {
   .hidden-xs.hidden-sm,
   tr.hidden-xs.hidden-sm,
   th.hidden-xs.hidden-sm,

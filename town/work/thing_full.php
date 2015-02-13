@@ -2,7 +2,7 @@
 echo '<hr class="main">';
 
 if ($_POST['thing_1']['name']){
-    echo '<div><div class="col-sm-6 col-xs-12">';
+    echo '<div class="col-sm-6 col-xs-12">';
     echo '<div><p style="font-size: 16px; font-weight: bold">';
     //Определяем тип вещи
     if($_POST['thing_1']['kind'] == 1){
@@ -50,6 +50,17 @@ if ($_POST['thing_1']['name']){
         }
         else{
             echo 'Уклонение: ' . $_POST['thing_1']['self_dodge'];
+        }
+    }
+    elseif($_POST['thing_1']['main_type'] == 'belt'){
+        if($_POST['thing_1']['type'] == 'Ремень'){
+            echo 'Защита: ' . $_POST['thing_1']['self_def'] . '</p>';
+        }
+        elseif($_POST['thing_1']['type'] == 'Сумка'){
+            echo 'Маг. защита: ' . $_POST['thing_1']['self_resist'] . '</p>';
+        }
+        else{
+            echo 'Уклонение: ' . $_POST['thing_1']['self_dodge'] . '</p>';
         }
     }
     elseif($_POST['thing_1']['main_type'] == 'finger'){
@@ -140,13 +151,13 @@ if ($_POST['thing_1']['name']){
     //Если предмет находится в рюкзаке
     if (isset($_POST['thing_1']['eqip']) && isset($_POST['thing_1']['box'])){
         $action_1 = "Надеть";
-        $to_1 = "eqip";
+        $to_1 = "to='eqip'";
         if(!($_POST['thing_1']['eqip'] == "false")){
             $disabled_1 = "";
         }
 
         $action_2= "В сундук";
-        $to_2 = "box";
+        $to_2 = "to='box'";
         if(!($_POST['thing_1']['box'] == "false")){
             $disabled_2 = "";
         }
@@ -154,13 +165,13 @@ if ($_POST['thing_1']['name']){
     //Если предмет находится в сундуке
     if (isset($_POST['thing_1']['eqip']) && isset($_POST['thing_1']['bag'])){
         $action_1 = "Надеть";
-        $to_1 = "eqip";
+        $to_1 = "to='eqip'";
         if(!($_POST['thing_1']['eqip'] == "false")){
             $disabled_1 = "";
         }
 
         $action_2= "В рюкзак";
-        $to_2 = "box";
+        $to_2 = "to='bag'";
         if(!($_POST['thing_1']['bag'] == "false")){
             $disabled_2 = "";
         }
@@ -169,24 +180,29 @@ if ($_POST['thing_1']['name']){
     //Если предмет находится в снаряжении
     if (isset($_POST['thing_1']['box']) && isset($_POST['thing_1']['bag'])){
         $action_1 = "В рюкзак";
-        $to_1 = "bag";
+        $to_1 = "to='bag'";
         if(!($_POST['thing_1']['bag'] == "false")){
             $disabled_1 = "";
         }
 
         $action_2= "В сундук";
-        $to_2 = "box";
+        $to_2 = "to='box'";
         if(!($_POST['thing_1']['box'] == "false")){
             $disabled_2 = "";
         }
     }
+    if(isset($_POST['from'])){
+        $to_1 = $to_1 . ' from="' . $_POST['from'] . '"';
+        $to_2 = $to_2 . ' from="' . $_POST['from'] . '"';
+    }
+
 
     echo '<div class="row">
                 <div class="col-sm-6 col-xs-6">
-                    <button to="' . $to_1 . '" class="btn-main put_to" ' . $disabled_1 . ' thing_id=' . $_POST['thing_1']['id'] . '>' . $action_1 . '</button>
+                    <button ' . $to_1 . ' class="btn-main put_to" ' . $disabled_1 . ' thing_id=' . $_POST['thing_1']['id'] . '>' . $action_1 . '</button>
                 </div>
                 <div class="col-sm-6 col-xs-6">
-                    <button to="' . $to_2 . '" class="btn-main put_to" ' . $disabled_2 . ' thing_id=' . $_POST['thing_1']['id'] . '>' . $action_2 . '</button>
+                    <button ' . $to_2 . ' class="btn-main put_to" ' . $disabled_2 . ' thing_id=' . $_POST['thing_1']['id'] . '>' . $action_2 . '</button>
                 </div>
             </div>';
     echo '</div>';
@@ -252,41 +268,41 @@ if ($_POST['thing_1']['name']){
         echo '</p></div></div><div style="border-bottom: #666666 dotted 1px; margin-bottom: 3px">';
         //Требуемые параметры
         echo '<p class="line"';
-        if ($_POST['thing_1']['check']['class'] == 'false'){
+        if ($_POST['thing_2']['check']['class'] == 'false'){
             echo ' style="color:red"';
         }
-        echo '>Класс: ' . $_POST['thing_1']['class'] . '</p>';
-        if ($_POST['thing_1']['n_lvl']) {
+        echo '>Класс: ' . $_POST['thing_2']['class'] . '</p>';
+        if ($_POST['thing_2']['n_lvl']) {
             echo '<p class="line"';
-            if ($_POST['thing_1']['check']['lvl'] == 'false'){
+            if ($_POST['thing_2']['check']['lvl'] == 'false'){
                 echo ' style="color:red"';
                 $not = 1;
             }
-            echo '>Требуемый уровень: ' . $_POST['thing_1']['n_lvl'] . '</p>';
+            echo '>Требуемый уровень: ' . $_POST['thing_2']['n_lvl'] . '</p>';
         }
-        if ($_POST['thing_1']['n_str']) {
+        if ($_POST['thing_2']['n_str']) {
             echo '<p class="line"';
-            if ($_POST['thing_1']['check']['str'] == 'false'){
+            if ($_POST['thing_2']['check']['str'] == 'false'){
                 echo ' style="color:red"';
                 $not = 1;
             }
-            echo '>Требуемая сила: ' . $_POST['thing_1']['n_str'] . '</p>';
+            echo '>Требуемая сила: ' . $_POST['thing_2']['n_str'] . '</p>';
         }
-        if ($_POST['thing_1']['n_dex']) {
+        if ($_POST['thing_2']['n_dex']) {
             echo '<p class="line"';
-            if ($_POST['thing_1']['check']['dex'] == 'false'){
+            if ($_POST['thing_2']['check']['dex'] == 'false'){
                 echo ' style="color:red"';
                 $not = 1;
             }
-            echo '>Требуемая ловкость: ' . $_POST['thing_1']['n_dex'] . '</p>';
+            echo '>Требуемая ловкость: ' . $_POST['thing_2']['n_dex'] . '</p>';
         }
-        if ($_POST['thing_1']['n_int']) {
+        if ($_POST['thing_2']['n_int']) {
             echo '<p class="line"';
-            if ($_POST['thing_1']['check']['intel'] == 'false'){
+            if ($_POST['thing_2']['check']['intel'] == 'false'){
                 echo ' style="color:red"';
                 $not = 1;
             }
-            echo '>Требуемый интелект: ' . $_POST['thing_1']['n_int'] . '</p>';
+            echo '>Требуемый интелект: ' . $_POST['thing_2']['n_int'] . '</p>';
         }
         echo '</div>';
         echo '<div style="border-bottom: #666666 dotted 1px; margin-bottom: 3px;">';
@@ -324,7 +340,6 @@ if ($_POST['thing_1']['name']){
             echo '<div style="border-bottom: #666666 dotted 1px; margin-bottom: 3px">
                     <p style="color: #00F5FF;">Награда. Нельзя улучшить или передать.</p></div>';
         }
-        echo '</div>';
     }
 
 }

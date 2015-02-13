@@ -1,4 +1,5 @@
 <?php
+echo '<div class="row without_chat">';
 echo '<div class="row">
         <div class="col-xs-4">
             <button id="eqip" class="btn-main">Снаряжение</button>
@@ -13,5 +14,9 @@ echo '<div class="row">
 
 echo '<div id="things_area" class="row">';
 echo '<div class="menu"><h3>' . $_POST['type'] . '</h3></div>';
-echo '<div id="items_list" class="row without_chat"></div>';
+echo '<div id="items_list" class="row"></div>';
+echo '</div>';
+
+echo '<hr class="main">';
+
 echo '</div>';

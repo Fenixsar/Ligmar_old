@@ -69,7 +69,7 @@ else{
     elseif($_POST['main_type'] == 'shoulders'){
         echo 'Уклонение: ' . $_POST['self_dodge'] . '</p>';
     }
-    elseif($_POST['main_type'] == 'rings'){
+    elseif($_POST['main_type'] == 'finger'){
         echo 'Урон: ' . $_POST['self_dmg'] . '</p>';
     }
     elseif($_POST['main_type'] == 'neck'){
@@ -132,6 +132,10 @@ else{
         }
     }
 
+    if($_POST['from'] == 'box' || $_POST['from'] == 'bag') {
+        $put_2 = $put_2 . ' from="' . $_POST['from'] . '"';
+        $put_1 = $put_1 . ' from="' . $_POST['from'] . '"';
+    }
 
     if($_POST['action_0'] != 'eqip') {
         echo '<div class="row">

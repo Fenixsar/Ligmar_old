@@ -7,6 +7,9 @@
  */
 
 echo '<div class="menu"><h3 style="text-align: center">Кузнец</h3></div>';
+echo '<div style="margin-bottom: 2px;text-align: center"><img src="../img/town/smith.png"></div>';
+
+echo '<hr class="main">';
 
 echo '<div class="row">';
 echo '<div class="col-xs-4"><button id="location" class="btn-main" disabled>Купить</button></div>';

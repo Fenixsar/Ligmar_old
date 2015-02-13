@@ -90,21 +90,6 @@ class main extends PDO {
         }
         return $mobs;
     }
-    //Начисление монеток с мобов
-    public function addGold($gold){
-        $sql = 'UPDATE users SET gold = ' . $gold . ' WHERE login = "' . $this->login . '"';
-        $this->db->exec($sql);
-    }
-    //Получение баланса золота
-    public function getGold(){
-        $sql = 'SELECT gold FROM users WHE RE login = "' . $this->login . '"';
-        $stmt = $this->db->prepare($sql);
-        $stmt -> execute();
-        while($row = $stmt->fetch()) {
-            $gold = $row;
-        }
-        return $gold['gold'];
-    }
     public function sendFeedback($name,$massage){
         $sql = "INSERT INTO feedbacks SET name = '{$name}', massage = '{$massage}'";
         $this->db->exec($sql);

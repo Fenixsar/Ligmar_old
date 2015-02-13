@@ -64,51 +64,9 @@ function links(socket){
             });
         });
     }).on('click','#bag',function(){
-        $('#hero').removeClass('active');
-        Ajax('../user/eqip_bag_box.php',{type:"Рюкзак"},undefined,function(){
-            socket.emit("get_box_bag_stat","",function(stats){
-                $("#count_bag").html("(" + stats.bag_count + "/" + stats.bag + ")");
-                $("#count_box").html("(" + stats.box_count + "/" + stats.box + ")");
-            });
-            $('#items_list').html(wait);
-            socket.emit("get_things","bag",function(things){
-                if(things){
-                    things.forEach(function(thing) {
-                        thing.action_1 = {type: "eqip"};
-                        thing.action_2 = {type: "box"};
-                        Ajax('../town/work/thing.php', thing, {selector: "#items_list", where: "append"}, function () {
-                            $('#items_list').find("#wait_loading_game").remove();
-                        });
-                    });
-                }
-                else{
-                    $('#items_list').find("#wait_loading_game").remove();
-                }
-            });
-        });
+        getBag();
     }).on('click','#box',function(){
-        $('#hero').removeClass('active');
-        Ajax('../user/eqip_bag_box.php',{type:"Сундук"},undefined,function(){
-            socket.emit("get_box_bag_stat","",function(stats){
-                $("#count_bag").html("(" + stats.bag_count + "/" + stats.bag + ")");
-                $("#count_box").html("(" + stats.box_count + "/" + stats.box + ")");
-            });
-            $('#items_list').html(wait);
-            socket.emit("get_things","box",function(things){
-                if(things){
-                    things.forEach(function(thing) {
-                        thing.action_1 = {type: "eqip"};
-                        thing.action_2 = {type: "bag"};
-                        Ajax('../town/work/thing.php', thing, {selector: "#items_list", where: "append"}, function () {
-                            $('#items_list').find("#wait_loading_game").remove();
-                        });
-                    });
-                }
-                else{
-                    $('#items_list').find("#wait_loading_game").remove();
-                }
-            });
-        });
+        getBox();
     }).on('click','#casket',function(){
         $('#hero').removeClass('active');
         Ajax('../user/casket.php');
@@ -119,13 +77,30 @@ function links(socket){
     $('#game').on('click','.btn-thing',function(){
         $('#things_area').html(wait);
         resize();
-
         socket.emit("get_thing",$(this).attr('thing_id'),function(thing){
-            console.log(thing);
+            thing.from = 'thing';
             Ajax('../town/work/thing_full.php',thing,"#things_area");
         });
     }).on('click','.put_to',function(){
-        Ajax('../ajax/put_to.php',{t:$(this).attr('thing_id'), to:$(this).attr('to')});
+        $('#things_area').html(wait);
+        resize();
+        var from = $(this).attr('from');
+        var thing_id = $(this).attr('thing_id');
+        socket.emit("put_to",{thing_id:thing_id,to:$(this).attr('to'),from:from},function(){
+            switch (from){
+                case "thing":
+                    socket.emit("get_thing",thing_id,function(thing){
+                        thing.from = 'thing';
+                        Ajax('../town/work/thing_full.php',thing,"#things_area");
+                    });
+                case "box":
+                    getBox();
+                    break;
+                case "bag":
+                    getBag();
+                    break;
+            }
+        });
     });
 
 
@@ -158,4 +133,58 @@ function links(socket){
         $('#chat_main').hide();
         Ajax('../user/main.php','hero');
     });
+
+
+
+    //----------------------------------Functions----------------------------------------\\
+    function getBox(){
+        $('#hero').removeClass('active');
+        Ajax('../user/eqip_bag_box.php',{type:"Сундук"},undefined,function(){
+            socket.emit("get_box_bag_stat","",function(stats){
+                $("#count_bag").html("(" + stats.bag_count + "/" + stats.bag + ")");
+                $("#count_box").html("(" + stats.box_count + "/" + stats.box + ")");
+            });
+            $('#items_list').html(wait);
+            socket.emit("get_things","box",function(things){
+                if(things){
+                    things.forEach(function(thing) {
+                        thing.action_1 = {type: "eqip"};
+                        thing.action_2 = {type: "bag"};
+                        thing.from = "box";
+                        Ajax('../town/work/thing.php', thing, {selector: "#items_list", where: "append"}, function () {
+                            $('#items_list').find("#wait_loading_game").remove();
+                        });
+                    });
+                }
+                else{
+                    $('#items_list').find("#wait_loading_game").remove();
+                }
+            });
+        });
+    }
+    function getBag(){
+        $('#hero').removeClass('active');
+        Ajax('../user/eqip_bag_box.php',{type:"Рюкзак"},undefined,function(){
+            socket.emit("get_box_bag_stat","",function(stats){
+                $("#count_bag").html("(" + stats.bag_count + "/" + stats.bag + ")");
+                $("#count_box").html("(" + stats.box_count + "/" + stats.box + ")");
+            });
+            $('#items_list').html(wait);
+            socket.emit("get_things","bag",function(things){
+                if(things){
+                    things.forEach(function(thing) {
+                        thing.action_1 = {type: "eqip"};
+                        thing.action_2 = {type: "box"};
+                        thing.from = "bag";
+                        Ajax('../town/work/thing.php', thing, {selector: "#items_list", where: "append"}, function () {
+                            $('#items_list').find("#wait_loading_game").remove();
+                        });
+                    });
+                }
+                else{
+                    $('#items_list').find("#wait_loading_game").remove();
+                }
+            });
+        });
+    }
 }

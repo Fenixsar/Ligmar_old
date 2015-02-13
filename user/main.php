@@ -27,6 +27,27 @@ if($user_id != 0){
             </ul>
         </div>
     </div>
+    <div id="free_char" class="row" style="display: none">
+        <hr class="zero">
+        <p style="text-align: center;color:lawngreen;">У вас остались нераспределенные очки характеристик!
+            <span id="count-stats" style="font-weight: bold">1</span></p>
+        <div class="col-xs-6">
+            <div class="col-xs-6 align-center">
+                <button char="str" class="btn-main up_char" disabled><img src="../img/plus.png" style="width: 20px"><br>Сила</button>
+            </div>
+            <div class="col-xs-6">
+                <button char="dex" class="btn-main up_char" disabled><img src="../img/plus.png" style="width: 20px"><br>Ловкость</button>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="col-xs-6">
+                <button char="int" class="btn-main up_char" disabled><img src="../img/plus.png" style="width: 20px"><br>Интелект</button>
+            </div>
+            <div class="col-xs-6">
+                <button char="vit" class="btn-main up_char" disabled><img src="../img/plus.png" style="width: 20px"><br>Выносливость</button>
+            </div>
+        </div>
+    </div>
     <hr class="zero">
     <div class="row">
         <div class="col-sm-6">

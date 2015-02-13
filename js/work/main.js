@@ -61,25 +61,13 @@ function Ajax(url,param,selector,callback){
         },
         success: function(data){
             //-----------------------В зависимости от полученных данных--------------------\\
-            if (data == 'box'){
-                Ajax('../user/box.php');
-            }
-            else if(data == 'bag'){
-                Ajax('../user/bag.php');
-            }
-            else if (data == 'eqip'){
-                main_socket.emit('updateAllStats','0');
-                Ajax('../user/eqip.php');
+            if(where == "append"){
+                $(selector).append(data);
             }
             else{
-                if(where == "append"){
-                    $(selector).append(data);
-                }
-                else{
-                    $(selector).html(data);
-                }
-                $('#game').css('height','auto');
+                $(selector).html(data);
             }
+            $('#game').css('height','auto');
             //-----------------------В зависимости от передаваемого параметра---------------\\
             if(param == 'hero'){
                 main_socket.emit('get_character', 0 , function(data){
@@ -94,6 +82,11 @@ function Ajax(url,param,selector,callback){
                     $('#intelligence_hero').html(data.intel);
                     if(data.vit != data.vit_self) $('#vitality_hero').css('color','dodgerblue');
                     $('#vitality_hero').html(data.vit);
+                    if(data.free_char){
+                        $('#count-stats').html(data.free_char);
+                        $('#free_char').show();
+                        $('.up_char').removeAttr('disabled');
+                    }
                     $('#dmg_hero').html(data.dmg_min + '-' + data.dmg_max);
                     $('#add_mag_dmg_hero').html(data.dmg_mag);
                     $('#accur_hero').html(data.accuracy);
@@ -131,11 +124,6 @@ function Ajax(url,param,selector,callback){
                         $('#res_time_remaining').html(death_info.getMinutes() + ':' + death_info.getSeconds());
                     },1000)
                 });
-            }
-            else if (param != undefined){
-                if(param.to == 'eqip'){
-                    main_socket.emit('updateAllStats','0');
-                }
             }
             resize();
             if (callback) {
